@@ -56,7 +56,7 @@ To be able to run `laravel-tool.ps1` from **anywhere**, follow these steps:
 - Click **OK** and close everything
 
 3. Now from any PowerShell window, you can run:
-```powershell```laravel-tool
+```laravel-tool```
 
 🔐 License
 MIT
