@@ -1,5 +1,5 @@
 function Show-MainMenu {
-    Write-Host "`n===== Laravel Artisan Toolkit =====" -ForegroundColor Cyan
+    Write-Host "`n=== Laravel Artisan Toolkit ===" -ForegroundColor Cyan
     Write-Host "1. Run Migrations" -ForegroundColor Magenta
     Write-Host "2. Run Seeders" -ForegroundColor Magenta
     Write-Host "3. Fresh Migrations (Drop & Migrate)" -ForegroundColor Magenta
@@ -7,9 +7,12 @@ function Show-MainMenu {
     Write-Host "5. Run Tests" -ForegroundColor Magenta
     Write-Host "6. Migration Generator" -ForegroundColor Magenta
     Write-Host "7. Rollback Migrations" -ForegroundColor Magenta
-    Write-Host "8. Generate Model + Migration" -ForegroundColor Magenta
+    Write-Host "10. Generate Controller" -ForegroundColor Magenta
+    Write-Host "8. Generate Model + Migration + Factory" -ForegroundColor Magenta
     Write-Host "9. Generate Factory" -ForegroundColor Magenta
-    Write-Host "10. Toolbox (maintenance & debug tools)" -ForegroundColor Magenta
+    Write-Host "10. Generate Request" -ForegroundColor Magenta
+    Write-Host "11. Toolbox (maintenance & debug tools)" -ForegroundColor Magenta
+    Write-Host "12. Controller Generator Menu" -ForegroundColor Magenta
     Write-Host "0. Exit" -ForegroundColor Green
     Write-Host "===================================" -ForegroundColor Cyan
 }
@@ -49,6 +52,22 @@ function Artisan-ToolboxMenu{
     Write-Host "0. Back to Main Menu" -ForegroundColor Green
     Write-Host "===================================" -ForegroundColor Magenta
 }
+
+
+function Show-ControllerMenu {
+    Write-Host "`n=== Controller Generator ===" -ForegroundColor Magenta
+    Write-Host "1. Basic Controller" -ForegroundColor Cyan
+    Write-Host "2. RESTful Controller" -ForegroundColor Cyan
+    Write-Host "3. RESTful Controller with Model" -ForegroundColor Cyan
+    Write-Host "4. API Controller (e.g., Api/Post)" -ForegroundColor Cyan
+    Write-Host "5. API Controller with Model (e.g., Api/Post)" -ForegroundColor Cyan
+    Write-Host "6. Invokable Controller" -ForegroundColor Cyan
+    Write-Host "7. Controller in Subdirectory (e.g., Admin/Post)" -ForegroundColor Cyan
+    Write-Host "8. Show make:controller help" -ForegroundColor Yellow
+    Write-Host "0. Back to Main Menu" -ForegroundColor Green
+    Write-Host "==========================================" -ForegroundColor Magenta
+}
+
 
 function Run-LaravelCommand {
     param([string]$command)
@@ -150,13 +169,17 @@ do {
         }
         "8" {
             $model = Read-Host "Enter model name"
-            Run-LaravelCommand "make:model $model -m"
+            Run-LaravelCommand "make:model $model -mf"
         }
         "9" {
             $model = Read-Host "Enter model name for factory"
             Run-LaravelCommand "make:factory ${model}Factory"
         }
-        "10" {
+        "10"{
+            $model = Read-Host "Enter model name for Request"
+            Run-LaravelCommand "make:request ${model}Request"
+        }
+        "11" {
             do {
                 Artisan-ToolboxMenu
                 $toolChoice = Read-Host "Select a toolbox option"
@@ -179,6 +202,42 @@ do {
                     default { Write-Host "Invalid option. Try again." -ForegroundColor Red }
                 }
             } while ($toolChoice -ne "0")
+        }
+        "12" {
+            do {
+                Show-ControllerMenu
+                $ControllerChoice = Read-Host "Select a Controller option"
+
+                if ($ControllerChoice -eq "0") {
+                    Write-Host "Returning to main menu..." -ForegroundColor Cyan
+                    break
+                }
+                if ($ControllerChoice -match '^\d+$' -and [int]$ControllerChoice -ge 1 -and [int]$ControllerChoice -le 8) {
+                    if ($ControllerChoice -ne "8") {
+                        $name = Read-Host "Enter the controller name"
+                    }
+                    if ($ControllerChoice -eq "3" -or $ControllerChoice -eq "5") {
+                        $model = Read-Host "Enter the model name"
+                    }
+                    if ($ControllerChoice -eq "7") {
+                        $subdirectory = Read-Host "Enter the subdirectory name"
+                    }
+                    switch ($ControllerChoice) {
+                        "1" { Run-LaravelCommand "make:controller ${name}Controller" }
+                        "2" { Run-LaravelCommand "make:controller ${name}Controller --resource" }
+                        "3" { Run-LaravelCommand "make:controller ${name}Controller --resource --model=$model" }
+                        "4" { Run-LaravelCommand "make:controller ${name}Controller --api" }
+                        "5" { Run-LaravelCommand "make:controller ${name}Controller --api --model=$model" }
+                        "6" { Run-LaravelCommand "make:controller ${name}Controller --invokable" }
+                        "7" { Run-LaravelCommand "make:controller ${subdirectory}/${name}Controller" }
+                        "8" { Run-LaravelCommand "help make:controller" }
+                        default { Write-Host "Invalid option. Try again." -ForegroundColor Red }
+                    }
+                } else {
+                    Write-Host "Invalid option. Try again." -ForegroundColor Red
+                }
+
+            } while ($true)
         }
         "0" {
             Write-Host "Goodbye! May the code be with you." -ForegroundColor Cyan
